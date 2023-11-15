@@ -19,7 +19,7 @@ if [ "${NASTOOL_AUTO_UPDATE}" = "true" ]; then
     if [ "${NASTOOL_VERSION}" == "dev" ]; then
       branch="dev"
     else
-      branch="master"
+      branch="main"
     fi
     git clean -dffx
     git fetch --depth 1 origin ${branch}
@@ -97,4 +97,5 @@ else
     export PATH=${PATH}:/usr/lib/chromium
 fi
 umask "${UMASK}"
-exec sudo -u "${PUID}":"${PGID}" "$(which dumb-init)" "$(which pm2-runtime)" start run.py -n NAStool --interpreter python3
+#exec su-exec "${PUID}":"${PGID}" "$(which dumb-init)" "$(which pm2-runtime)" start run.py -n NAStool --interpreter python3
+python3 run.py

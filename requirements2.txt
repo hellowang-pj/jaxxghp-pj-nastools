@@ -1,0 +1,6 @@
+anitopy==2.1.1
+qbittorrent-api==2023.11.55
+transmission-rpc==7.0.3
+feapder==1.8.9
+PlexAPI==4.15.5
+slack-bolt==1.18.0

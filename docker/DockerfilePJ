@@ -39,13 +39,18 @@ ENV LANG="C.UTF-8" \
     UMASK=000 \
     WORKDIR="/nas-tools"
 WORKDIR ${WORKDIR}
-RUN python_ver=$(python3 -V | awk '{print $2}') \
+COPY NASTOOL_PACK.zip /
+COPY requirements2.txt /
+RUN pip install -r /requirements2.txt 
+RUN unzip /NASTOOL_PACK.zip -d ${WORKDIR}  \
+	&& apk --no-cache add su-exec \
+	&& python_ver=$(python3 -V | awk '{print $2}') \
     && echo "${WORKDIR}/" > /usr/lib/python${python_ver%.*}/site-packages/nas-tools.pth \
     && echo 'fs.inotify.max_user_watches=524288' >> /etc/sysctl.conf \
     && echo 'fs.inotify.max_user_instances=524288' >> /etc/sysctl.conf \
-    && git config --global pull.ff only \
-    && git clone -b main ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
-    && git config --global --add safe.directory ${WORKDIR}
+    && echo 'git config --global pull.ff only' \
+    && echo 'git clone -b main ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule' \
+    && echo 'git config --global --add safe.directory ${WORKDIR}'
 EXPOSE 3000
 VOLUME ["/config"]
 ENTRYPOINT ["/nas-tools/docker/entrypoint.sh"]
