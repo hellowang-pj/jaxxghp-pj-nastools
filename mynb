@@ -1,6 +1,5 @@
 #! /bin/bash
 
-docker rmi mynastool:1.0
 rm NASTOOL_PACK.zip
 zip -r NASTOOL_PACK.zip *
-sudo docker build -f docker/DockerfilePJ -t mynastool:1.0 .
+sudo docker build -f docker/DockerfilePJ -t mynastool:1.1 .

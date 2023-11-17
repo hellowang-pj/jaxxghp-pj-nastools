@@ -1,28 +1,21 @@
 FROM alpine
+COPY package_list.txt /
 COPY requirements.txt /
-COPY install.sh /
-RUN apk add --no-cache libffi-dev \
-	&& sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk add  git python3-dev py3-pip tzdata zip curl bash fuse3 xvfb inotify-tools chromium-chromedriver s6-overlay ffmpeg redis wget shadow sudo \
+COPY requirements2.txt /
+COPY install_rclone.sh /
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk add $(cat /package_list.txt)
+RUN pip install --upgrade pip setuptools wheel 
+RUN pip install -r /requirements.txt 
+RUN pip install -r /requirements2.txt \ 
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo "${TZ}" > /etc/timezone \
     && ln -sf /usr/bin/python3 /usr/bin/python \
-    && bash /install.sh \
+    && bash /install_rclone.sh \
     && if [ "$(uname -m)" = "x86_64" ]; then ARCH=amd64; elif [ "$(uname -m)" = "aarch64" ]; then ARCH=arm64; fi \
     && curl https://dl.min.io/client/mc/release/linux-${ARCH}/mc --create-dirs -o /usr/bin/mc \
-    && chmod +x /usr/bin/mc 
-RUN	apk add --virtual .build-deps \
-        libffi-dev \
-        gcc \
-        musl-dev \
-        libxml2-dev \
-        libxslt-dev \
-	&& pip install --upgrade pip setuptools wheel \
-    && pip install cython 
-RUN pip install -r /requirements.txt \
-    && apk del libffi-dev 
-RUN apk add  nodejs npm \
-	&& npm install pm2 -g \
+    && chmod +x /usr/bin/mc\
+    && npm install pm2 -g \
     && echo "rm -rf /tmp/* /root/.cache /var/cache/apk/*"
 ENV LANG="C.UTF-8" \
     TZ="Asia/Shanghai" \
@@ -40,17 +33,12 @@ ENV LANG="C.UTF-8" \
     WORKDIR="/nas-tools"
 WORKDIR ${WORKDIR}
 COPY NASTOOL_PACK.zip /
-COPY requirements2.txt /
-RUN pip install -r /requirements2.txt 
 RUN unzip /NASTOOL_PACK.zip -d ${WORKDIR}  \
-	&& apk --no-cache add su-exec \
-	&& python_ver=$(python3 -V | awk '{print $2}') \
+    && python_ver=$(python3 -V | awk '{print $2}') \
     && echo "${WORKDIR}/" > /usr/lib/python${python_ver%.*}/site-packages/nas-tools.pth \
     && echo 'fs.inotify.max_user_watches=524288' >> /etc/sysctl.conf \
     && echo 'fs.inotify.max_user_instances=524288' >> /etc/sysctl.conf \
-    && echo 'git config --global pull.ff only' \
-    && echo 'git clone -b main ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule' \
-    && echo 'git config --global --add safe.directory ${WORKDIR}'
 EXPOSE 3000
 VOLUME ["/config"]
 ENTRYPOINT ["/nas-tools/docker/entrypoint.sh"]
+
