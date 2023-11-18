@@ -112,6 +112,7 @@ class Config(object):
 
     def __init__(self):
         self._config_path = os.environ.get('NASTOOL_CONFIG')
+        #self._config_path = "./config/config.yaml"
         if not os.environ.get('TZ'):
             os.environ['TZ'] = 'Asia/Shanghai'
         self.init_syspath()

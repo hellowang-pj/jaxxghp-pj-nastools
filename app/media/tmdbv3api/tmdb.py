@@ -3,6 +3,8 @@
 import logging
 import os
 import time
+import log
+
 from functools import lru_cache
 
 import requests
@@ -145,7 +147,7 @@ class TMDb(object):
         return self.cached_request.cache_clear()
 
     def _call(
-            self, action, append_to_response, call_cached=True, method="GET", data=None
+        self, action, append_to_response, call_cached=True, method="GET", data=None
     ):
         if self.api_key is None or self.api_key == "":
             raise TMDbException("No API key found.")
@@ -157,6 +159,7 @@ class TMDb(object):
             append_to_response,
             self.language,
         )
+        log.debug("_call start %s,%s " % (action,url))
 
         if self.cache and self.obj_cached and call_cached and method != "POST":
             req = self.cached_request(method, url, data, self.proxies)
@@ -172,10 +175,12 @@ class TMDb(object):
             self._reset = int(headers["X-RateLimit-Reset"])
 
         if self._remaining < 1:
+            log.debug("self._remaining < 1")
             current_time = int(time.time())
             sleep_time = self._reset - current_time
 
             if self.wait_on_rate_limit:
+                log.debug("Rate limit reached. Sleeping for: %d"  % sleep_time)
                 logger.warning("Rate limit reached. Sleeping for: %d" % sleep_time)
                 time.sleep(abs(sleep_time))
                 self._call(action, append_to_response, call_cached, method, data)
@@ -185,21 +190,45 @@ class TMDb(object):
                 )
 
         json = req.json()
+        results =None
+        page=0
+        total_pages=0
+        if "errors" in json:
+            raise TMDbException(json["errors"])
+        if "results" in json:
+            results=json["results"]
 
         if "page" in json:
             os.environ["page"] = str(json["page"])
+            # 递归调用当前方法，增加page参数
+            page = int(json["page"])
+
 
         if "total_results" in json:
             os.environ["total_results"] = str(json["total_results"])
 
         if "total_pages" in json:
             os.environ["total_pages"] = str(json["total_pages"])
+            total_pages = int(json["total_pages"])
+
+        #获取全部的结果再返回
+        for page in range(page + 1, total_pages + 1):
+            log.debug(f"get {page} times results")
+            if "page" in append_to_response:
+                # 如果url中已经包含了page参数，则直接修改其值
+                append_to_response = append_to_response.replace("page=%s" % (page - 1), "page=%s" % page)
+            else:
+                # 否则在url中添加page参数
+                append_to_response += "&page=%s" % page
+            subJson = self._call(action, append_to_response, call_cached, method, data)
+            if "results" in subJson:
+                results.extend(subJson["results"])
+            if page == total_pages:
+                break
 
         if self.debug:
             logger.info(json)
             logger.info(self.cached_request.cache_info())
 
-        if "errors" in json:
-            raise TMDbException(json["errors"])
-
         return json
+

@@ -104,12 +104,14 @@ class Media:
         :param tmdb_id: TMDB的ID
         :return: 所有译名的清单
         """
+        log.debug("__search_tmdb_allnames start")
         if not mtype or not tmdb_id:
             return {}, []
         ret_names = []
         tmdb_info = self.get_tmdb_info(mtype=mtype, tmdbid=tmdb_id)
         if not tmdb_info:
             return tmdb_info, []
+        log.debug(f"【Meta】API返回 allnames ：{tmdb_info}")
         if mtype == MediaType.MOVIE:
             alternative_titles = tmdb_info.get("alternative_titles", {}).get("titles", [])
             for alternative_title in alternative_titles:
@@ -380,6 +382,7 @@ class Media:
         :param file_media_name: 识别的文件名或种子名
         :return: 匹配的媒体信息
         """
+        log.debug("__search_multi_tmdb start")
         try:
             multis = self.search.multi({"query": file_media_name}) or []
         except TMDbException as err:
@@ -388,7 +391,7 @@ class Media:
         except Exception as e:
             log.error(f"【Meta】连接TMDB出错：{str(e)}")
             return None
-        log.debug(f"【Meta】API返回：{str(self.search.total_results)}")
+        log.debug(f"【Meta】API返回 multi_tmdb：{str(self.search.total_results)}")
         if len(multis) == 0:
             log.debug(f"【Meta】{file_media_name} 未找到相关媒体息!")
             return {}
@@ -533,6 +536,7 @@ class Media:
         """
         查询名称中有关键字的所有的TMDB信息并返回
         """
+        log.debug("get_tmdb_infos start")
         if not self.tmdb:
             log.error("【Meta】TMDB API Key 未设置！")
             return []
@@ -558,6 +562,8 @@ class Media:
         """
         同时查询模糊匹配的电影、电视剧TMDB信息
         """
+        log.debug("__search_multi_tmdbinfos start")
+
         if not title:
             return []
         ret_infos = []
@@ -821,8 +827,12 @@ class Media:
                         continue
                     # 区配缓存及TMDB
                     media_key = self.__make_cache_key(meta_info)
-                    if not self.meta.get_meta_data_by_key(media_key):
+                    #if not self.meta.get_meta_data_by_key(media_key):
+                    if 1:
                         # 没有缓存数据
+                        log.debug("【PJ - Meta】开始检索self.__search_tmdb : file_media_name %s  first_media_year %s "
+                                  "search_type %s media_year %s season_number %s ！" % (meta_info.get_name(),
+                                   meta_info.year,meta_info.type,meta_info.year,meta_info.begin_season))
                         file_media_info = self.__search_tmdb(file_media_name=meta_info.get_name(),
                                                              first_media_year=meta_info.year,
                                                              search_type=meta_info.type,

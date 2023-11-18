@@ -28,6 +28,9 @@ class WordsHelper:
         self.offset_words_info = self.dbhelper.get_custom_words(enabled=1, wtype=4, regex=1)
 
     def process(self, title):
+        pattern = r"\w+\.com@"  # 正则表达式模式，匹配任意域名后面跟着 "@"
+        # 使用正则表达式替换
+        title = re.sub(pattern, "", title)
         # 错误信息
         msg = []
         # 应用自定义识别

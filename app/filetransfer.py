@@ -550,6 +550,8 @@ class FileTransfer:
                 log.info("【Rmt】所有文件均已成功转移过，没有需要处理的文件！如需重新处理，请清理缓存（服务->清理转移缓存）")
                 return __finish_transfer(True, "没有新文件需要处理")
         # API检索出媒体信息，传入一个文件列表，得出每一个文件的名称，这里是当前目录下所有的文件了
+        log.debug("【PJ - Meta】检索媒体信息开始！")
+        log.debug("【PJ - Meta】 file_list %s, tmdb_info %s, media_type %s, season %s, episode[0] %s" % (file_list, tmdb_info, media_type, season, episode[0]))
         Medias = self.media.get_media_info_on_files(file_list, tmdb_info, media_type, season, episode[0])
         if not Medias:
             log.error("【Rmt】检索媒体信息出错！")
