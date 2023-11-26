@@ -190,18 +190,11 @@ class TMDb(object):
                 )
 
         json = req.json()
-        results =None
-        page=0
-        total_pages=0
         if "errors" in json:
             raise TMDbException(json["errors"])
-        if "results" in json:
-            results=json["results"]
 
         if "page" in json:
             os.environ["page"] = str(json["page"])
-            # 递归调用当前方法，增加page参数
-            page = int(json["page"])
 
 
         if "total_results" in json:
@@ -209,22 +202,6 @@ class TMDb(object):
 
         if "total_pages" in json:
             os.environ["total_pages"] = str(json["total_pages"])
-            total_pages = int(json["total_pages"])
-
-        #获取全部的结果再返回
-        for page in range(page + 1, total_pages + 1):
-            log.debug(f"get {page} times results")
-            if "page" in append_to_response:
-                # 如果url中已经包含了page参数，则直接修改其值
-                append_to_response = append_to_response.replace("page=%s" % (page - 1), "page=%s" % page)
-            else:
-                # 否则在url中添加page参数
-                append_to_response += "&page=%s" % page
-            subJson = self._call(action, append_to_response, call_cached, method, data)
-            if "results" in subJson:
-                results.extend(subJson["results"])
-            if page == total_pages:
-                break
 
         if self.debug:
             logger.info(json)

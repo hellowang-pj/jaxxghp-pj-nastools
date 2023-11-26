@@ -175,7 +175,9 @@ def login():
         if GoPage.startswith('/'):
             GoPage = GoPage[1:]
         username = request.form.get('username')
+        #username = 'admin'
         password = request.form.get('password')
+        #password = 'password'
         remember = request.form.get('remember')
         if not username:
             return redirect_to_login('请输入用户名')

@@ -543,7 +543,7 @@ class Media:
         if not title:
             return []
         if not mtype and not year:
-            results = self.__search_multi_tmdbinfos(title)
+            results = self.__search_multi_tmdbinfos(title, page)
         else:
             if not mtype:
                 results = list(
@@ -556,9 +556,11 @@ class Media:
                 results = self.__search_movie_tmdbinfos(title, year)
             else:
                 results = self.__search_tv_tmdbinfos(title, year)
+        if len(results) == 20:
+            return results
         return results[(page - 1) * 20:page * 20]
 
-    def __search_multi_tmdbinfos(self, title):
+    def __search_multi_tmdbinfos(self, title, page=1):
         """
         同时查询模糊匹配的电影、电视剧TMDB信息
         """
@@ -567,7 +569,7 @@ class Media:
         if not title:
             return []
         ret_infos = []
-        multis = self.search.multi({"query": title}) or []
+        multis = self.search.multi({"query": title, "page": page}) or []
         for multi in multis:
             if multi.get("media_type") in ["movie", "tv"]:
                 multi['media_type'] = MediaType.MOVIE if multi.get("media_type") == "movie" else MediaType.TV
@@ -827,12 +829,14 @@ class Media:
                         continue
                     # 区配缓存及TMDB
                     media_key = self.__make_cache_key(meta_info)
-                    #if not self.meta.get_meta_data_by_key(media_key):
+                    # if not self.meta.get_meta_data_by_key(media_key):
                     if 1:
                         # 没有缓存数据
                         log.debug("【PJ - Meta】开始检索self.__search_tmdb : file_media_name %s  first_media_year %s "
                                   "search_type %s media_year %s season_number %s ！" % (meta_info.get_name(),
-                                   meta_info.year,meta_info.type,meta_info.year,meta_info.begin_season))
+                                                                                       meta_info.year, meta_info.type,
+                                                                                       meta_info.year,
+                                                                                       meta_info.begin_season))
                         file_media_info = self.__search_tmdb(file_media_name=meta_info.get_name(),
                                                              first_media_year=meta_info.year,
                                                              search_type=meta_info.type,
