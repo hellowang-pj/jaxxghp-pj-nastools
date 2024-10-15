@@ -19,7 +19,7 @@ ENV LANG="C.UTF-8" \
 WORKDIR /nas-tools
 
 # 复制所需文件
-COPY package_list.txt requirements.txt install_rclone.sh NASTOOL_PACK.zip ./
+COPY package_list.txt requirements.txt  requirements2.txt NASTOOL_PACK.zip ./
 
 # 安装依赖和工具
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
@@ -29,11 +29,11 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     && curl -L https://dl.min.io/client/mc/release/linux-${ARCH}/mc --create-dirs -o /usr/bin/mc \
     && chmod +x /usr/bin/mc \
     && npm install pm2 -g \
-    && pip install --upgrade pip wheel \
+    && pip install --upgrade pip wheel && pip install setuptools==60.0.0 \
     && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir -r requirements2.txt \
+    unzip -n NASTOOL_PACK.zip -d /nas-tools \
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && echo "${TZ}" > /etc/timezone \
-    && unzip NASTOOL_PACK.zip -d /nas-tools/ \
     && python_ver=$(python3 -V | awk '{print $2}') \
     && echo "/nas-tools/" > /usr/lib/python${python_ver%.*}/site-packages/nas-tools.pth \
     && echo 'fs.inotify.max_user_watches=524288' >> /etc/sysctl.conf \

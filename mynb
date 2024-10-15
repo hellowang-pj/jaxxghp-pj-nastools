@@ -2,7 +2,7 @@
 
 # 检查是否提供版本号参数
 if [ -z "$1" ]; then
-  echo "请提供版本号，例如: ./mynb.sh 1.2"
+  echo "请提供版本号，例如: ./mynb 1.2"
   exit 1
 fi
 
