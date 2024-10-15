@@ -32,7 +32,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     && pip install --upgrade pip wheel && pip install setuptools==60.0.0 \
     && pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir -r requirements2.txt \
-    unzip -n NASTOOL_PACK.zip -d /nas-tools \
+    && unzip -n NASTOOL_PACK.zip -d /nas-tools \
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && python_ver=$(python3 -V | awk '{print $2}') \
     && echo "/nas-tools/" > /usr/lib/python${python_ver%.*}/site-packages/nas-tools.pth \
