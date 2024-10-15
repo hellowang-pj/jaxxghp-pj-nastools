@@ -1,5 +1,13 @@
 #! /bin/bash
 
+# 检查是否提供版本号参数
+if [ -z "$1" ]; then
+  echo "请提供版本号，例如: ./mynb.sh 1.2"
+  exit 1
+fi
+
+VERSION=$1
+
 rm NASTOOL_PACK.zip
 zip -r NASTOOL_PACK.zip *
-sudo docker build -f docker/DockerfilePJ -t mynastool:1.1 .
+docker build -f docker/DockerfilePJ -t mynastool:$VERSION .
