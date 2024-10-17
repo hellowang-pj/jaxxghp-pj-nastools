@@ -13,10 +13,11 @@ ENV LANG="C.UTF-8" \
     ALPINE_MIRROR="mirrors.ustc.edu.cn" \
     PUID=0 \
     PGID=0 \
-    UMASK=000
+    UMASK=000 \
+    WORKDIR="/nas-tools"
 
 # 设置工作目录
-WORKDIR /nas-tools
+WORKDIR ${WORKDIR}
 
 # 复制所需文件
 COPY package_list.txt requirements.txt  requirements2.txt NASTOOL_PACK.zip ./
