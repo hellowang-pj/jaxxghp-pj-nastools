@@ -7,7 +7,20 @@ if [ -z "$1" ]; then
 fi
 
 VERSION=$1
+DOCKERFILE="docker/DockerfilePJ"
+IMAGE_NAME="mynastool"
 
-rm NASTOOL_PACK.zip
+# 检查是否有输入 -d 参数
+if [[ "$2" == "-d" ]]; then
+  DOCKERFILE="docker/DockerfilePJDevp"
+  IMAGE_NAME="mydevnastool"
+fi
+
+rm -f NASTOOL_PACK.zip
 zip -r NASTOOL_PACK.zip *
-docker build -f docker/DockerfilePJ -t mynastool:$VERSION .
+docker build -f "$DOCKERFILE" -t "$IMAGE_NAME:$VERSION" .
+
+# 添加 docker tag
+docker tag "$IMAGE_NAME:$VERSION" "dockerwpj/$IMAGE_NAME:$VERSION"
+docker save -o ~/$IMAGE_NAME.tar dockerwpj/$IMAGE_NAME:$VERSION
+echo "get tar : ~/$IMAGE_NAME.tar "
